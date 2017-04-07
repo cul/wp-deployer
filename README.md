@@ -10,7 +10,7 @@ wp-deployer.php [environment] [deployment_type]
 
 `environment` can be any value like dev, test or prod (or whatever you name the files that you put in the environments directory)
 
-`deployment_type` can be one of the following: new | update | restore
+`deployment_type` only has one valid value at the moment: new (but one day, there may be 'update' and 'restore' options too)
 
 Running the command `wp-deployer.php dev new` would expect a corresponding 'dev' environment config file to exist at `environments/dev.config.php`
 
@@ -18,9 +18,9 @@ Running the command `wp-deployer.php dev new` would expect a corresponding 'dev'
 
 new: Downloads and deploys a new instance of WordPress.
 
-update: Updates an existing wordpress deployment, pulling in the latest versions of custom themes and plugins.
+update (not available yet): Updates an existing wordpress deployment, pulling in the latest versions of custom themes and plugins.
 
-restore: Deploys a WordPress instance from a backup.
+restore (not available yet): Deploys a WordPress instance from a backup.
 
 ### Requirements
 
