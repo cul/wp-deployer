@@ -1,7 +1,7 @@
 <?php
 
-require 'functions.php';
-require 'deploy-type-new.php';
+require 'inc/functions.php';
+require 'inc/deploy-type-new.php';
 
 if(empty($argv[1])) {
   echo color_text("Please specify an environment (e.g. dev)", RED) . "\n";

@@ -16,14 +16,14 @@ function deploy_new_app($ssh_connection, $DEPLOY_CONFIG) {
   echo "Setting up new instance of WP with version: $wp_version..." . "\n";
   
   echo "Setting up required deployment directories on server" . "\n";
-  // Set up deployment directory if it doesn't exist
+  // Set up deployment directory and subdirectories if they doesn't exist
   run_ssh_command($ssh_connection, "mkdir -p '" . get_deploy_shared_dir($DEPLOY_CONFIG) . "'");
   run_ssh_command($ssh_connection, "mkdir -p '" . get_deploy_shared_config_dir($DEPLOY_CONFIG) . "'");
   run_ssh_command($ssh_connection, "mkdir -p '" . get_deploy_releases_dir($DEPLOY_CONFIG) . "'");
   run_ssh_command($ssh_connection, "mkdir -p '" . get_deploy_tmp_dir($DEPLOY_CONFIG) . "'");
   run_ssh_command($ssh_connection, "mkdir -p '" . get_zipfile_download_dir($DEPLOY_CONFIG) . "'");
   run_ssh_command($ssh_connection, "mkdir -p '" . get_zipfile_unpack_dir($DEPLOY_CONFIG) . "'");
-  
+
   //Clean up any old downloads or unpacked WP copies
   echo "Cleaning up old wp downloads..." . "\n";
   clean_up_old_zipfiles_and_unpack_directories($ssh_connection, $DEPLOY_CONFIG);
@@ -51,7 +51,22 @@ function deploy_new_app($ssh_connection, $DEPLOY_CONFIG) {
   
   //Remove wp-config-sample.php
   echo "Removing wp-config-sample.php..." . "\n";
-  run_ssh_command($ssh_connection, "rm $release_path/wp-config-sample.php");
+  run_ssh_command($ssh_connection, "rm '$release_path/wp-config-sample.php'");
+
+  // If WP_DATA_DIR/wp-content already exists, delete the newly unzipped wp-content directory
+  // Otherwise, move the newly unzipped wp-content directory to WP_DATA_DIR/wp-content 
+  $path_to_wp_content_directory = get_wp_content_dir($DEPLOY_CONFIG);
+  if(file_exists_on_server($ssh_connection, $path_to_wp_content_directory)) {
+    echo "Removing newly unzipped wp-content directory because one was found at $path_to_wp_content_directory";
+    run_ssh_command($ssh_connection, "mv '$release_path/wp-content' '$path_to_wp_content_directory'");
+  } else {
+    echo "No wp-content directory found at $path_to_wp_content_directory, so the newly unzipped wp-content directory will be moved there...";
+    run_ssh_command($ssh_connection, "mv '$release_path/wp-content' '$path_to_wp_content_directory'");
+  }
+
+  // Symlink $release_path/wp-content to $path_to_wp_content_directory 
+  echo "Symlinking release wp-content to $path_to_wp_content_directory";
+  run_ssh_command($ssh_connection, "ln -s '$path_to_wp_content_directory' '$release_path/wp-content'");
   
   // Symlink config files to shared/config directory
   $shared_config_dir = get_deploy_shared_config_dir($DEPLOY_CONFIG);
@@ -64,16 +79,16 @@ function deploy_new_app($ssh_connection, $DEPLOY_CONFIG) {
       delete_release($ssh_connection, $DEPLOY_CONFIG, $release_name);
       die(color_text("Deployment FAILED.", RED) . "\n");
     }
-    $wp_config_delete_and_symlink_command = "ln -s $path_to_shared_config_file $release_path/$file_to_symlink";
+    $wp_config_delete_and_symlink_command = "ln -s '$path_to_shared_config_file' '$release_path/$file_to_symlink'";
     run_ssh_command($ssh_connection, $wp_config_delete_and_symlink_command);
   }
   
-  // Remove old current symlink and replace with new symlink to the latest release
+  // Remove old 'current' symlink and replace with new symlink to the latest release
   echo "Symlinking $deploy_current_dir_path to $release_path..." . "\n";
   $symlink_command = "rm $deploy_current_dir_path; ln -s $release_path " . get_deploy_current_dir($DEPLOY_CONFIG);
   run_ssh_command($ssh_connection, $symlink_command);
   
-  //Clean up zip file and unpack directory
+  // Clean up zip file and unpack directory
   echo "Cleaning up latest wp zip download..." . "\n";
   clean_up_old_zipfiles_and_unpack_directories($ssh_connection, $DEPLOY_CONFIG);
   

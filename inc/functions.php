@@ -11,12 +11,12 @@ function usage() {
 
 function load_config_for_environment($env) {
   //Require config file for specified environment
-  $config_file_path = dirname(__FILE__)."/environments/{$env}.config.php";
+  $config_file_path = dirname(__FILE__)."/../environments/{$env}.config.php";
   if(!file_exists($config_file_path)) {
     echo color_text("Could not find config file for environment $env at: $config_file_path", RED) . "\n";
     exit;
   }
-  require dirname(__FILE__)."/environments/{$env}.config.php"; //Note: This require populates a $DEPLOY_CONFIG variable.
+  require $config_file_path; //Note: This require populates a $DEPLOY_CONFIG variable.
   return $DEPLOY_CONFIG;
 }
 
@@ -27,6 +27,10 @@ function clean_up_old_zipfiles_and_unpack_directories($ssh_connection, $DEPLOY_C
 
 function get_current_datetime_based_release_name() {
   return date('YmdHis');
+}
+
+function get_wp_content_dir($DEPLOY_CONFIG) {
+  return "{$DEPLOY_CONFIG['WP_DATA_DIR']}/wp-content";
 }
 
 function get_deploy_tmp_dir($DEPLOY_CONFIG) {
@@ -107,7 +111,7 @@ function delete_release($ssh_connection, $DEPLOY_CONFIG, $release_name) {
 }
 
 function file_exists_on_server($ssh_connection, $full_path_to_file_on_server) {
-  $result = run_ssh_command($ssh_connection, "[ -e '$full_path_to_file_on_server' ] && echo '1' || echo '0'");
+  $result = run_ssh_command($ssh_connection, "[ -e '$full_path_to_file_on_server' ] && echo '1' || echo '0'", false);
   return ('1' == $result);
 }
 
