@@ -71,7 +71,7 @@ function deploy_new_app($ssh_connection, $DEPLOY_CONFIG) {
   // Symlink config files to shared/config directory
   $shared_config_dir = get_deploy_shared_config_dir($DEPLOY_CONFIG);
   echo "Symlinking config files to shared/config directory..." . "\n";
-  $symlinked_config_files = array('robots.txt', 'wp-config.php');
+  $symlinked_config_files = $DEPLOY_CONFIG['SYMLINKED_FILES'];
   foreach($symlinked_config_files as $file_to_symlink) {
     $path_to_shared_config_file = "$shared_config_dir/$file_to_symlink";
     if(!file_exists_on_server($ssh_connection, $path_to_shared_config_file)) {

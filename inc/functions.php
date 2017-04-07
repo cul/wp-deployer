@@ -76,8 +76,8 @@ function get_ssh_connection($DEPLOY_CONFIG) {
     die('Found private key, but could not find public key file at expected location: ' . $public_key_file);
   }
   
-  if (ssh2_auth_pubkey_file($ssh_connection, 'ldpdserv', $public_key_file, $private_key_file)) {
-    echo "Public Key Authentication Successful\n";
+  if (ssh2_auth_pubkey_file($ssh_connection, $DEPLOY_CONFIG['USER'], $public_key_file, $private_key_file)) {
+    echo "Public Key Authentication Successful: {$DEPLOY_CONFIG['USER']}@{$DEPLOY_CONFIG['SERVER']}\n";
   } else {
     die('Public Key Authentication Failed');
   }
