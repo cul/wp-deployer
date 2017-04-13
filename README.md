@@ -1,11 +1,13 @@
 ### WP Deployer
 
-WordPress deployment script for the CUL environment.
+wp-mittens: A WordPress deployment script for the CUL environment.
+
+_Name based on the present active participle of the Latin word mittō ("to send")._
 
 ### Usage:
 
 ```sh
-wp-deployer.php [environment] [deployment_type]
+wp-mittens.php [environment] [deployment_type]
 ```
 
 `environment` can be any value like dev, test or prod (or whatever you name the files that you put in the environments directory)
