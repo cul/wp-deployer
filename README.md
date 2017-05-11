@@ -10,7 +10,7 @@ _Name based on the present active participle of the Latin word mittō ("to send"
 wp-mittens.php [environment] [deployment_type]
 ```
 
-`environment` can be any value like dev, test or prod (or whatever you name the files that you put in the environments directory)
+`environment` can be any value like dev, test or prod (or whatever you name the files that you put in the environments directory).  [environment] param can also be a path to a config file rather than an environment name.
 
 `deployment_type` only has one valid value at the moment: new (but one day, there may be 'update' and 'restore' options too)
 
