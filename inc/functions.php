@@ -29,8 +29,12 @@ function get_current_datetime_based_release_name() {
   return date('YmdHis');
 }
 
+function get_data_dir($DEPLOY_CONFIG) {
+  return "{$DEPLOY_CONFIG['WP_DATA_DIR']}";
+}
+
 function get_wp_content_dir($DEPLOY_CONFIG) {
-  return "{$DEPLOY_CONFIG['WP_DATA_DIR']}/wp-content";
+  return get_data_dir($DEPLOY_CONFIG) . "/wp-content";
 }
 
 function get_deploy_tmp_dir($DEPLOY_CONFIG) {
@@ -71,24 +75,24 @@ function get_ssh_connection($DEPLOY_CONFIG) {
   } else {
     die("Could not find private key file in: $default_private_key_directory");
   }
-  
+
   if(!file_exists($public_key_file)) {
     die('Found private key, but could not find public key file at expected location: ' . $public_key_file);
   }
-  
+
   if (ssh2_auth_pubkey_file($ssh_connection, $DEPLOY_CONFIG['USER'], $public_key_file, $private_key_file)) {
     echo "Public Key Authentication Successful: {$DEPLOY_CONFIG['USER']}@{$DEPLOY_CONFIG['SERVER']}\n";
   } else {
     die('Public Key Authentication Failed');
   }
-  
+
   return $ssh_connection;
 }
 
 function run_ssh_command($ssh_connection, $command, $echo_command=true) {
-  
+
   echo '  ' . color_text($command, YELLOW) . "\n";
-  
+
   // execute a command
   if (!($stream = ssh2_exec($ssh_connection, $command ))) {
       echo "fail: unable to execute command\n";
@@ -118,24 +122,24 @@ function file_exists_on_server($ssh_connection, $full_path_to_file_on_server) {
 function get_wp_latest_version() {
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, "https://api.wordpress.org/core/version-check/1.7/");
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   $json_response = curl_exec($ch);
   curl_close($ch);
   $data = json_decode($json_response, true);
-  
+
   $version = $data['offers'][0]['version'];
-  
+
   return $version;
 }
 
 function wordpress_version_exists_on_github($version) {
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, "https://github.com/WordPress/WordPress/releases/{$version}");
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   $response = curl_exec($ch);
   $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
   curl_close($ch);
-  
+
   return ($http_code == '200');
 }
 
