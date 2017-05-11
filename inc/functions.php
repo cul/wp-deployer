@@ -6,15 +6,22 @@ DEFINE('YELLOW', "\033[33m");
 DEFINE('DEFAULT_COLOR', "\033[0m");
 
 function usage() {
-  echo 'Usage: wp-deployer.php [environment dev|test|prod] [deployment_type new|update|restore]' . "\n";
+  echo 'Usage: wp-deployer.php [environment dev|test|prod] [deployment_type new|update|restore]' . "\n" .
+  "  Note: [environment] param can also be a path to a config file rather than an environment name." . "\n";
 }
 
 function load_config_for_environment($env) {
   //Require config file for specified environment
-  $config_file_path = dirname(__FILE__)."/../environments/{$env}.config.php";
-  if(!file_exists($config_file_path)) {
-    echo color_text("Could not find config file for environment $env at: $config_file_path", RED) . "\n";
-    exit;
+  $config_file_path_for_env_name = dirname(__FILE__)."/../environments/{$env}.config.php";
+  if(file_exists($config_file_path_for_env_name)) {
+    $config_file_path = $config_file_path_for_env_name;
+  } else {
+    // If config file does not exist for the environment name, maybe the user passed in a full path to a config file AS the $env. Let's check.
+    $config_file_path = $env;
+    if(!file_exists($config_file_path)) {
+      echo color_text("Could not find config file for environment. Checked at:\n$config_file_path_for_env_name\nAND\n$config_file_path", RED) . "\n";
+      exit;
+    }
   }
   require $config_file_path; //Note: This require populates a $DEPLOY_CONFIG variable.
   return $DEPLOY_CONFIG;
